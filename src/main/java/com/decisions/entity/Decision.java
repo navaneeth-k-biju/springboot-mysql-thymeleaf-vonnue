@@ -9,6 +9,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
@@ -25,6 +27,10 @@ public class Decision {
 
     @Column(length = 500)
     private String description;
+
+    @ManyToOne
+    @JoinColumn(name = "owner_id")
+    private AppUser owner;
 
     @OneToMany(mappedBy = "decision", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DecisionOption> options = new ArrayList<>();
@@ -47,6 +53,9 @@ public class Decision {
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+
+    public AppUser getOwner() { return owner; }
+    public void setOwner(AppUser owner) { this.owner = owner; }
 
     public List<DecisionOption> getOptions() { return options; }
     public void setOptions(List<DecisionOption> options) { this.options = options; }
