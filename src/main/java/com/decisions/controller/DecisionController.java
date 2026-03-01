@@ -2,6 +2,8 @@ package com.decisions.controller;
 
 import java.util.List;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,71 +29,85 @@ public class DecisionController {
     }
 
     @GetMapping("/")
-    public String showDecisionForm(Model model) {
+    public String showDecisionForm(Model model, @AuthenticationPrincipal UserDetails userDetails) {
         model.addAttribute("decision", new Decision());
+        model.addAttribute("username", userDetails.getUsername());
         return "decision-form";
     }
 
     @GetMapping("/history")
-    public String showHistory(Model model) {
-        model.addAttribute("decisions", decisionService.getDecisionHistory());
+    public String showHistory(Model model, @AuthenticationPrincipal UserDetails userDetails) {
+        model.addAttribute("decisions", decisionService.getDecisionHistory(userDetails.getUsername()));
+        model.addAttribute("username", userDetails.getUsername());
         return "history";
     }
 
     @PostMapping("/decision/create")
-    public String createDecision(@ModelAttribute Decision decision) {
-        Decision saved = decisionService.saveDecision(decision);
+    public String createDecision(@ModelAttribute Decision decision,
+                                 @AuthenticationPrincipal UserDetails userDetails) {
+        Decision saved = decisionService.saveDecision(decision, userDetails.getUsername());
         return "redirect:/decision/" + saved.getId() + "/detail";
     }
     
     @GetMapping("/decision/{id}/detail")
-    public String showDetailPage(@PathVariable Long id, Model model) {
-        Decision decision = decisionService.getDecisionById(id);
+    public String showDetailPage(@PathVariable Long id,
+                                 Model model,
+                                 @AuthenticationPrincipal UserDetails userDetails) {
+        Decision decision = decisionService.getDecisionByIdForUser(id, userDetails.getUsername());
         model.addAttribute("decision", decision);
+        model.addAttribute("username", userDetails.getUsername());
         return "decision-detail";
     }
 
     @PostMapping("/decision/{id}/addOption")
     public String addOption(@PathVariable Long id,
-                            @RequestParam String optionName) {
-        decisionService.addOption(id, optionName);
+                            @RequestParam String optionName,
+                            @AuthenticationPrincipal UserDetails userDetails) {
+        decisionService.addOption(id, optionName, userDetails.getUsername());
         return "redirect:/decision/" + id + "/detail";
     }
 
     @PostMapping("/decision/{id}/deleteOption")
     public String deleteOption(@PathVariable Long id,
-                               @RequestParam Long optionId) {
-        decisionService.deleteOption(optionId);
+                               @RequestParam Long optionId,
+                               @AuthenticationPrincipal UserDetails userDetails) {
+        decisionService.deleteOption(id, optionId, userDetails.getUsername());
         return "redirect:/decision/" + id + "/detail";
     }
 
     @PostMapping("/decision/{id}/addCriteria")
     public String addCriteria(@PathVariable Long id,
                               @RequestParam String criteriaName,
-                              @RequestParam int weight) {
-        decisionService.addCriteria(id, criteriaName, weight);
+                              @RequestParam int weight,
+                              @AuthenticationPrincipal UserDetails userDetails) {
+        decisionService.addCriteria(id, criteriaName, weight, userDetails.getUsername());
         return "redirect:/decision/" + id + "/detail";
     }
 
     @PostMapping("/decision/{id}/deleteCriteria")
     public String deleteCriteria(@PathVariable Long id,
-                                 @RequestParam Long criteriaId) {
-        decisionService.deleteCriteria(criteriaId);
+                                 @RequestParam Long criteriaId,
+                                 @AuthenticationPrincipal UserDetails userDetails) {
+        decisionService.deleteCriteria(id, criteriaId, userDetails.getUsername());
         return "redirect:/decision/" + id + "/detail";
     }
 
 
     @GetMapping("/decision/{id}/score")
-    public String showScoreForm(@PathVariable Long id, Model model) {
-        Decision decision = decisionService.getDecisionById(id);
+    public String showScoreForm(@PathVariable Long id,
+                                Model model,
+                                @AuthenticationPrincipal UserDetails userDetails) {
+        Decision decision = decisionService.getDecisionByIdForUser(id, userDetails.getUsername());
 
         if (decision.getOptions().isEmpty() || decision.getCriteriaList().isEmpty()) {
             model.addAttribute("decision", decision);
             model.addAttribute("error", "Please add at least one option and one criterion before scoring.");
+            model.addAttribute("username", userDetails.getUsername());
             return "decision-detail";
         }
 
         model.addAttribute("decision", decision);
+        model.addAttribute("username", userDetails.getUsername());
         return "score-form";
     }
 
@@ -99,26 +115,30 @@ public class DecisionController {
     public String saveScores(@PathVariable Long id,
                              @RequestParam List<Long> optionIds,
                              @RequestParam List<Long> criteriaIds,
-                             @RequestParam List<Integer> scores) {
+                             @RequestParam List<Integer> scores,
+                             @AuthenticationPrincipal UserDetails userDetails) {
     	
         int criteriaCount = criteriaIds.size();
 
         for (int i = 0; i < optionIds.size(); i++) {
             List<Integer> optionScores = scores.subList(i * criteriaCount, (i + 1) * criteriaCount);
-            decisionService.saveScores(optionIds.get(i), criteriaIds, optionScores);
+            decisionService.saveScores(id, optionIds.get(i), criteriaIds, optionScores, userDetails.getUsername());
         }
 
         return "redirect:/decision/" + id + "/result";
     }
 
     @GetMapping("/decision/{id}/result")
-    public String showResult(@PathVariable Long id, Model model) {
-        Decision decision = decisionService.getDecisionById(id);
+    public String showResult(@PathVariable Long id,
+                             Model model,
+                             @AuthenticationPrincipal UserDetails userDetails) {
+        Decision decision = decisionService.getDecisionByIdForUser(id, userDetails.getUsername());
         List<RankedOptionDTO> rankedOptions = evaluationService.evaluate(decision);
 
         model.addAttribute("decision", decision);
         model.addAttribute("rankedOptions", rankedOptions);
         model.addAttribute("topOption", rankedOptions.isEmpty() ? null : rankedOptions.get(0));
+        model.addAttribute("username", userDetails.getUsername());
         return "result";
     }
 
