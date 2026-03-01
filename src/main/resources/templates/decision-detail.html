@@ -7,8 +7,17 @@
 </head>
 <body>
 <div class="container">
+    <nav class="topbar">
+        <a th:href="@{/}" class="brand">🧭 Decision Companion</a>
+        <div class="topbar-actions">
+            <span class="user-chip" th:text="${username}"></span>
+            <a th:href="@{/history}" class="btn btn-outline">History</a>
+            <a th:href="@{/logout}" class="btn btn-outline">Logout</a>
+        </div>
+    </nav>
+
     <div class="header">
-        <h1>🧭 Decision Companion</h1>
+        <h1>Decision Detail</h1>
         <p class="subtitle" th:text="${decision.title}"></p>
     </div>
 
@@ -80,7 +89,6 @@
     </div>
 
     <div class="actions">
-        <a th:href="@{/history}" class="btn btn-outline">View History</a>
         <a th:href="@{/decision/{id}/score(id=${decision.id})}" class="btn btn-primary">
             Next: Score Options →
         </a>

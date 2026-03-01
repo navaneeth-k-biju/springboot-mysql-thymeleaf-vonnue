@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="container">
+    <nav class="topbar">
+        <a th:href="@{/login}" class="brand">🧭 Decision Companion</a>
+        <div class="topbar-actions">
+            <a th:href="@{/register}" class="btn btn-outline">Register</a>
+        </div>
+    </nav>
+
+    <div class="header">
+        <h1>Welcome Back</h1>
+        <p class="subtitle">Sign in to continue</p>
+    </div>
+
+    <div th:if="${error}" class="alert-error" th:text="${error}"></div>
+    <div th:if="${success}" class="alert-success" th:text="${success}"></div>
+
+    <div class="card auth-card">
+        <h2>Login</h2>
+        <form th:action="@{/login}" th:object="${loginRequest}" method="post">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input id="username" type="text" th:field="*{username}" required class="input-field"/>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input id="password" type="password" th:field="*{password}" required class="input-field"/>
+            </div>
+            <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+        <p class="hint auth-hint">No account? <a th:href="@{/register}">Create one</a></p>
+    </div>
+</div>
+</body>
+</html>

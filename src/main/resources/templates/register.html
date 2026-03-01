@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Register</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="container">
+    <nav class="topbar">
+        <a th:href="@{/login}" class="brand">🧭 Decision Companion</a>
+        <div class="topbar-actions">
+            <a th:href="@{/login}" class="btn btn-outline">Login</a>
+        </div>
+    </nav>
+
+    <div class="header">
+        <h1>Create Account</h1>
+        <p class="subtitle">Create your account</p>
+    </div>
+
+    <div th:if="${error}" class="alert-error" th:text="${error}"></div>
+
+    <div class="card auth-card">
+        <h2>Register</h2>
+        <form th:action="@{/register}" th:object="${registerRequest}" method="post">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input id="username" type="text" th:field="*{username}" required class="input-field"/>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input id="email" type="email" th:field="*{email}" required class="input-field"/>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input id="password" type="password" th:field="*{password}" required class="input-field"/>
+            </div>
+            <button type="submit" class="btn btn-primary">Create Account</button>
+        </form>
+        <p class="hint auth-hint">Already have an account? <a th:href="@{/login}">Login</a></p>
+    </div>
+</div>
+</body>
+</html>
